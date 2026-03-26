@@ -1,0 +1,703 @@
+{
+	"info": {
+		"_postman_id": "case02-petstore-collection",
+		"name": "CASE02 - Petstore API Test",
+		"description": "Test case design untuk Petstore API dengan 15 skenario (8 positif, 7 negatif). Menggunakan chaining, assertion status code dan response body.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://petstore.swagger.io/v2",
+			"type": "string"
+		},
+		{
+			"key": "petId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Positive Test Cases",
+			"item": [
+				{
+					"name": "TC-P01: Create New Pet (POST /pet)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P01: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Response body memiliki field id dan name",
+									"pm.test('TC-P01: Response body has id and name', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData.name).to.eql('DoggyTest');",
+									"    pm.expect(jsonData.status).to.eql('available');",
+									"});",
+									"",
+									"// Chaining: Simpan petId untuk request berikutnya",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('petId', jsonData.id);",
+									"console.log('Pet ID saved: ' + jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 99881,\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Dogs\"\n  },\n  \"name\": \"DoggyTest\",\n  \"photoUrls\": [\n    \"https://example.com/photo.jpg\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"test-tag\"\n    }\n  ],\n  \"status\": \"available\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pet",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet"]
+						}
+					}
+				},
+				{
+					"name": "TC-P02: Get Pet by ID (GET /pet/{petId})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P02: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Response body cocok dengan pet yang dibuat",
+									"pm.test('TC-P02: Response body matches created pet', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.eql(Number(pm.collectionVariables.get('petId')));",
+									"    pm.expect(jsonData.name).to.eql('DoggyTest');",
+									"    pm.expect(jsonData.status).to.eql('available');",
+									"});",
+									"",
+									"// Assertion: Response memiliki structure yang benar",
+									"pm.test('TC-P02: Response has correct structure', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('category');",
+									"    pm.expect(jsonData).to.have.property('photoUrls');",
+									"    pm.expect(jsonData).to.have.property('tags');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/{{petId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "{{petId}}"]
+						}
+					}
+				},
+				{
+					"name": "TC-P03: Update Pet (PUT /pet)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P03: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Data pet sudah ter-update",
+									"pm.test('TC-P03: Pet name updated successfully', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('DoggyUpdated');",
+									"    pm.expect(jsonData.status).to.eql('sold');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": {{petId}},\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Dogs\"\n  },\n  \"name\": \"DoggyUpdated\",\n  \"photoUrls\": [\n    \"https://example.com/photo-updated.jpg\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"updated-tag\"\n    }\n  ],\n  \"status\": \"sold\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pet",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet"]
+						}
+					}
+				},
+				{
+					"name": "TC-P04: Find Pet by Status (GET /pet/findByStatus)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P04: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Response berupa array",
+									"pm.test('TC-P04: Response is an array', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"// Assertion: Semua pet memiliki status 'available'",
+									"pm.test('TC-P04: All pets have status available', function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(pet) {",
+									"        pm.expect(pet.status).to.eql('available');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/findByStatus?status=available",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "findByStatus"],
+							"query": [
+								{
+									"key": "status",
+									"value": "available"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-P05: Create Store Order (POST /store/order)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P05: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Order berhasil dibuat",
+									"pm.test('TC-P05: Order created with correct data', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData.petId).to.eql(Number(pm.collectionVariables.get('petId')));",
+									"    pm.expect(jsonData.quantity).to.eql(1);",
+									"    pm.expect(jsonData.status).to.eql('placed');",
+									"});",
+									"",
+									"// Chaining: Simpan orderId",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set('orderId', jsonData.id);",
+									"console.log('Order ID saved: ' + jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 7781,\n  \"petId\": {{petId}},\n  \"quantity\": 1,\n  \"shipDate\": \"2026-03-25T10:00:00.000Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/store/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["store", "order"]
+						}
+					}
+				},
+				{
+					"name": "TC-P06: Get Store Order by ID (GET /store/order/{orderId})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P06: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Order sesuai dengan yang dibuat",
+									"pm.test('TC-P06: Order data matches', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.eql(Number(pm.collectionVariables.get('orderId')));",
+									"    pm.expect(jsonData.status).to.eql('placed');",
+									"    pm.expect(jsonData.complete).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/store/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["store", "order", "{{orderId}}"]
+						}
+					}
+				},
+				{
+					"name": "TC-P07: Create User (POST /user)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P07: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Response menunjukkan berhasil",
+									"pm.test('TC-P07: User creation response is valid', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('unknown');",
+									"    pm.expect(Number(jsonData.message)).to.be.a('number');",
+									"});",
+									"",
+									"// Chaining: Simpan username",
+									"pm.collectionVariables.set('username', 'testuser_case02');",
+									"console.log('Username saved: testuser_case02');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": 88001,\n  \"username\": \"testuser_case02\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"08123456789\",\n  \"userStatus\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": ["{{baseUrl}}"],
+							"path": ["user"]
+						}
+					}
+				},
+				{
+					"name": "TC-P08: Get User by Username (GET /user/{username})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 200",
+									"pm.test('TC-P08: Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Assertion: Data user sesuai",
+									"pm.test('TC-P08: User data matches created user', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.username).to.eql('testuser_case02');",
+									"    pm.expect(jsonData.firstName).to.eql('Test');",
+									"    pm.expect(jsonData.lastName).to.eql('User');",
+									"    pm.expect(jsonData.email).to.eql('testuser@example.com');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/{{username}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "{{username}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Negative Test Cases",
+			"item": [
+				{
+					"name": "TC-N01: Get Pet with Non-existent ID (GET /pet/999999999)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 404",
+									"pm.test('TC-N01: Status code is 404', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Assertion: Response body menunjukkan not found",
+									"pm.test('TC-N01: Response indicates pet not found', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('error');",
+									"    pm.expect(jsonData.message).to.eql('Pet not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/999999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "999999999"]
+						}
+					}
+				},
+				{
+					"name": "TC-N02: Get Pet with Invalid ID String (GET /pet/invalidId)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 404 atau 400",
+									"pm.test('TC-N02: Status code is 404 or 400', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+									"});",
+									"",
+									"// Assertion: Response menunjukkan error",
+									"pm.test('TC-N02: Response indicates error', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('unknown');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/invalidId",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "invalidId"]
+						}
+					}
+				},
+				{
+					"name": "TC-N03: Find Pet with Invalid Status (GET /pet/findByStatus?status=xyz)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code 200 (empty array) atau 400",
+									"pm.test('TC-N03: Status code is 200 or 400', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+									"});",
+									"",
+									"// Assertion: Jika 200, response harus empty array",
+									"pm.test('TC-N03: Response is empty array for invalid status', function () {",
+									"    if (pm.response.code === 200) {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData).to.be.an('array');",
+									"        pm.expect(jsonData.length).to.eql(0);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/findByStatus?status=xyz",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "findByStatus"],
+							"query": [
+								{
+									"key": "status",
+									"value": "xyz"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "TC-N04: Create Pet with Empty Body (POST /pet)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code menunjukkan bad request",
+									"pm.test('TC-N04: Status code indicates client/server error', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 405, 415, 500]);",
+									"});",
+									"",
+									"// Assertion: Tidak boleh 200 OK",
+									"pm.test('TC-N04: Response is not 200', function () {",
+									"    pm.expect(pm.response.code).to.not.eql(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pet",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet"]
+						}
+					}
+				},
+				{
+					"name": "TC-N05: Get Order with Non-existent ID (GET /store/order/99999)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 404",
+									"pm.test('TC-N05: Status code is 404', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Assertion: Response body menunjukkan not found",
+									"pm.test('TC-N05: Response indicates order not found', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('error');",
+									"    pm.expect(jsonData.message).to.eql('Order not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/store/order/99999",
+							"host": ["{{baseUrl}}"],
+							"path": ["store", "order", "99999"]
+						}
+					}
+				},
+				{
+					"name": "TC-N06: Get Non-existent User (GET /user/nonexistentuser123)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 404",
+									"pm.test('TC-N06: Status code is 404', function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Assertion: Response body menunjukkan not found",
+									"pm.test('TC-N06: Response indicates user not found', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql('error');",
+									"    pm.expect(jsonData.message).to.eql('User not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/nonexistentuser123",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "nonexistentuser123"]
+						}
+					}
+				},
+				{
+					"name": "TC-N07: Delete Pet Non-existent ID (DELETE /pet/999999999)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assertion: Status code harus 404",
+									"pm.test('TC-N07: Status code is 404', function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/999999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "999999999"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cleanup",
+			"item": [
+				{
+					"name": "Cleanup: Delete Created Pet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Cleanup: Pet deleted, status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/pet/{{petId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["pet", "{{petId}}"]
+						}
+					}
+				},
+				{
+					"name": "Cleanup: Delete Created Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Cleanup: Order deleted, status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/store/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["store", "order", "{{orderId}}"]
+						}
+					}
+				},
+				{
+					"name": "Cleanup: Delete Created User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Cleanup: User deleted, status 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/{{username}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "{{username}}"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
