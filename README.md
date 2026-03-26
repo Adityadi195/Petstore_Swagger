@@ -34,8 +34,8 @@ Pastikan perangkat lunak berikut sudah terinstal sebelum menjalankan pengujian:
 
 | Perangkat Lunak | Versi Minimum | Keterangan |
 |----------------|---------------|------------|
-| [Node.js](https://nodejs.org/) | v14+ | Diperlukan untuk Newman |
-| [Newman](https://www.npmjs.com/package/newman) | v5+ | CLI runner untuk Postman |
+| [Node.js](https://nodejs.org/) | v22.14.0 | Diperlukan untuk Newman |
+| [Newman](https://www.npmjs.com/package/newman) | 6.2.2 | CLI runner untuk Postman |
 | [Postman](https://www.postman.com/downloads/) | Terbaru | Opsional, untuk jalankan via GUI |
 | newman-reporter-htmlextra | v1+ | Opsional, untuk laporan HTML |
 
